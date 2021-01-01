@@ -51,8 +51,10 @@ class Player(xbmc.Player):
             self.last_key = song_key
 
     def onAVStarted(self):
-        if self.getPlayingFile() in STREAM_INFO:
+        if self.isPlayingAudio() and self.getPlayingFile() in STREAM_INFO:
             xbmc.executebuiltin('Action(FullScreen)')
+        else:
+            self.now_playing = None
 
     def onPlayBackEnded(self):
         self.now_playing = None

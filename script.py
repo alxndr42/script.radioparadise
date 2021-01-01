@@ -21,8 +21,12 @@ class Window(xbmcgui.WindowXML):
 
     def onClick(self, controlId):
         if controlId == 50:
+            audio_format = addon.getSetting('audio_format')
             item = self.getListItem(self.getCurrentListPosition())
-            url = item.getProperty('url_aac')
+            if audio_format == 'flac':
+                url = item.getProperty('url_flac')
+            else:
+                url = item.getProperty('url_aac')
             play_url(url)
             self.close()
 

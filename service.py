@@ -52,7 +52,10 @@ class Player(xbmc.Player):
 
     def onAVStarted(self):
         if self.isPlayingAudio() and self.getPlayingFile() in STREAM_INFO:
-            xbmc.executebuiltin('Action(FullScreen)')
+            url = self.getPlayingFile()
+            # Kodi switches to fullscreen for FLAC, but not AAC
+            if url == STREAM_INFO[url]['url_aac']:
+                xbmc.executebuiltin('Action(FullScreen)')
         else:
             self.now_playing = None
 

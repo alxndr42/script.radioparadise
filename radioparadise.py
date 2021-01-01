@@ -73,7 +73,7 @@ class NowPlaying():
         now = time.time()
         if now < self.next_update:
             return
-        res = requests.get(self.url, timeout=1)
+        res = requests.get(self.url, timeout=2)
         res.raise_for_status()
         data = res.json()
         songs = {}

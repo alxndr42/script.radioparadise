@@ -1,7 +1,12 @@
+from collections import namedtuple
+
 import xbmc
 import xbmcgui
 
 from radioparadise import STREAM_INFO, NowPlaying
+
+
+Song = namedtuple('Song', 'key data cover')
 
 
 class Player(xbmc.Player):
@@ -11,6 +16,7 @@ class Player(xbmc.Player):
         """Constructor"""
         super().__init__()
         self.last_key = None
+        self.last_song = None
         self.now_playing = NowPlaying()
 
     def get_song_key(self):
@@ -27,6 +33,7 @@ class Player(xbmc.Player):
     def reset(self):
         """Reset internal state when not playing RP."""
         self.last_key = None
+        self.last_song = None
         self.now_playing.set_channel(None)
 
     def update(self):
@@ -46,13 +53,32 @@ class Player(xbmc.Player):
             return
 
         cover = song_data.get('cover', '')
-        info = build_music_info(song_key, song_data)
-        item = xbmcgui.ListItem()
-        item.setPath(self.getPlayingFile())
-        item.setArt({'thumb': cover})
-        item.setInfo('music', info)
-        self.updateInfoTag(item)
         self.last_key = song_key
+        self.last_song = Song(song_key, song_data, cover)
+        self.update_player()
+
+    def update_player(self):
+        """Update the Kodi player with song metadata."""
+        song = self.last_song
+        if song and self.isPlayingAudio():
+            info = {
+                'artist': song.key[0],
+                'title': song.key[1],
+                'genre': '',
+            }
+            if 'album' in song.data:
+                info['album'] = song.data['album']
+            if 'rating' in song.data:
+                rating = float(song.data['rating'])
+                info['rating'] = rating
+                info['userrating'] = int(round(rating))
+            if 'year' in song.data:
+                info['year'] = int(song.data['year'])
+            item = xbmcgui.ListItem()
+            item.setPath(self.getPlayingFile())
+            item.setArt({'thumb': song.cover})
+            item.setInfo('music', info)
+            self.updateInfoTag(item)
 
     def onAVStarted(self):
         if self.isPlaying() and self.getPlayingFile() in STREAM_INFO:
@@ -80,23 +106,6 @@ class Player(xbmc.Player):
 
     def onPlayBackStopped(self):
         self.reset()
-
-
-def build_music_info(song_key, song_data):
-    """Return a dict for Player.updateInfoTag()."""
-    result = {
-        'artist': song_key[0],
-        'title': song_key[1],
-        'genre': '',
-    }
-    if 'album' in song_data:
-        result['album'] = song_data['album']
-    if 'rating' in song_data:
-        result['rating'] = float(song_data['rating'])
-        result['userrating'] = int(round(float(song_data['rating'])))
-    if 'year' in song_data:
-        result['year'] = int(song_data['year'])
-    return result
 
 
 if __name__ == '__main__':

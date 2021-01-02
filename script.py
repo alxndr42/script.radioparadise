@@ -11,8 +11,7 @@ class Window(xbmcgui.WindowXML):
         listitems = []
         for s in STREAMS:
             item = xbmcgui.ListItem(s['title'])
-            item.setProperty('url_aac', s['url_aac'])
-            item.setProperty('url_flac', s['url_flac'])
+            item.setProperty('channel', str(s['channel']))
             listitems.append(item)
         self.clearList()
         self.addItems(listitems)
@@ -21,18 +20,20 @@ class Window(xbmcgui.WindowXML):
 
     def onClick(self, controlId):
         if controlId == 50:
-            audio_format = addon.getSetting('audio_format')
             item = self.getListItem(self.getCurrentListPosition())
-            if audio_format == 'flac':
-                url = item.getProperty('url_flac')
-            else:
-                url = item.getProperty('url_aac')
-            play_url(url)
+            channel = int(item.getProperty('channel'))
+            play_channel(channel)
             self.close()
 
 
-def play_url(url):
-    """Play the URL, unless it's already playing."""
+def play_channel(channel_number):
+    """Play the channel, unless it's already playing."""
+    stream = STREAMS[channel_number]
+    audio_format = addon.getSetting('audio_format')
+    if audio_format == 'flac':
+        url = stream['url_flac']
+    else:
+        url = stream['url_aac']
     player = xbmc.Player()
     if not player.isPlayingAudio() or player.getPlayingFile() != url:
         player.stop()
@@ -42,6 +43,10 @@ def play_url(url):
 if __name__ == '__main__':
     addon = xbmcaddon.Addon()
     addon_path = addon.getAddonInfo('path')
-    window = Window('radioparadise.xml', addon_path)
-    window.doModal()
-    del window
+    auto_play = addon.getSettingInt('auto_play')
+    if auto_play == -1:
+        window = Window('radioparadise.xml', addon_path)
+        window.doModal()
+        del window
+    else:
+        play_channel(auto_play)

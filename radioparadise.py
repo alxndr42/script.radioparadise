@@ -46,14 +46,9 @@ STREAM_INFO.update({s['url_flac']: s for s in STREAMS})
 class NowPlaying():
     """Provides song information from the "nowplaying" API."""
 
-    def __init__(self, channel):
-        """Constructor
-
-        channel - RP channel number (int)
-        """
-        self.url = NOWPLAYING_URL.format(channel)
-        self.next_update = 0
-        self.songs = {}
+    def __init__(self):
+        """Constructor"""
+        self.set_channel(None)
 
     def get_song_data(self, song_key):
         """Return a dict for the (artist, title) key, or None.
@@ -63,6 +58,15 @@ class NowPlaying():
         key = build_key(song_key)
         return self.songs.get(key)
 
+    def set_channel(self, channel):
+        """Set the RP channel number, or None."""
+        if channel is not None:
+            self.url = NOWPLAYING_URL.format(channel)
+        else:
+            self.url = None
+        self.next_update = 0
+        self.songs = {}
+
     def update(self):
         """Update song information from the API, if necessary.
 
@@ -70,6 +74,8 @@ class NowPlaying():
 
         Raises an exception on error responses or timeouts.
         """
+        if self.url is None:
+            return
         now = time.time()
         if now < self.next_update:
             return

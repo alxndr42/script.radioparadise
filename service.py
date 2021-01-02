@@ -1,12 +1,14 @@
 from collections import namedtuple
+import time
 
 import xbmc
+import xbmcaddon
 import xbmcgui
 
-from radioparadise import STREAM_INFO, NowPlaying
+from radioparadise import SLIDESHOW_URL, STREAM_INFO, NowPlaying
 
 
-Song = namedtuple('Song', 'key data cover')
+Song = namedtuple('Song', 'key data cover fanart')
 
 
 class Player(xbmc.Player):
@@ -18,6 +20,7 @@ class Player(xbmc.Player):
         self.last_key = None
         self.last_song = None
         self.now_playing = NowPlaying()
+        self.slideshow = Slideshow()
 
     def get_song_key(self):
         """Return (artist, title) for the current song, or None."""
@@ -35,10 +38,16 @@ class Player(xbmc.Player):
         self.last_key = None
         self.last_song = None
         self.now_playing.set_channel(None)
+        self.slideshow.set_slides(None)
 
     def update(self):
         """Update RP API and music player information."""
         self.now_playing.update()
+
+        next_slide = self.slideshow.next_slide()
+        if next_slide and self.last_song:
+            self.last_song = self.last_song._replace(fanart=next_slide)
+            self.update_player()
 
         song_key = self.get_song_key()
         if song_key == self.last_key:
@@ -52,9 +61,22 @@ class Player(xbmc.Player):
         if song_data is None:
             return
 
-        cover = song_data.get('cover', '')
+        cover = song_data.get('cover')
+
+        addon = xbmcaddon.Addon()
+        slideshow = addon.getSetting('slideshow')
+        if slideshow == 'rp':
+            slides = song_data.get('slideshow', '').split(',')
+            slides = [SLIDESHOW_URL.format(s) for s in slides if s]
+            delay = addon.getSettingInt('slide_duration')
+            self.slideshow.set_slides(slides, delay)
+            fanart = self.slideshow.next_slide()
+        else:
+            self.slideshow.set_slides(None)
+            fanart = None
+
         self.last_key = song_key
-        self.last_song = Song(song_key, song_data, cover)
+        self.last_song = Song(song_key, song_data, cover, fanart)
         self.update_player()
 
     def update_player(self):
@@ -77,6 +99,7 @@ class Player(xbmc.Player):
             item = xbmcgui.ListItem()
             item.setPath(self.getPlayingFile())
             item.setArt({'thumb': song.cover})
+            item.setArt({'fanart': song.fanart})
             item.setInfo('music', info)
             self.updateInfoTag(item)
 
@@ -106,6 +129,33 @@ class Player(xbmc.Player):
 
     def onPlayBackStopped(self):
         self.reset()
+
+
+class Slideshow():
+    """Provides timed slide URLs."""
+
+    def __init__(self):
+        self.set_slides(None)
+
+    def set_slides(self, slides, delay=10):
+        """Set slides and delay, or None."""
+        if slides:
+            self.slides = slides
+            self.delay = delay
+            self.index = 0
+            self.time = 0
+        else:
+            self.slides = None
+
+    def next_slide(self):
+        """Return the next slide URL, or None."""
+        result = None
+        now = time.time()
+        if self.slides and self.time + self.delay < now:
+            result = self.slides[self.index]
+            self.index = (self.index + 1) % len(self.slides)
+            self.time = now
+        return result
 
 
 if __name__ == '__main__':

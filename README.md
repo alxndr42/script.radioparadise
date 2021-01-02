@@ -1,10 +1,11 @@
 # Radio Paradise addon for Kodi
 
-Plays [Radio Paradise][] music mixes.
+Plays [Radio Paradise][] music mixes, accompanied by the HD slideshow.
 
 ## Features
 
 - Radio Paradise music mixes in AAC or FLAC
+- HD slideshow (optional)
 - Auto Play (optional)
 
 ## Requirements

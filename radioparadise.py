@@ -13,6 +13,8 @@ KEY_FILTER_RE = re.compile(r'[^\w\']+')
 
 NOWPLAYING_URL = 'https://api.radioparadise.com/api/nowplaying_list?chan={}'
 
+SLIDESHOW_URL = 'https://img.radioparadise.com/slideshow/720/{}.jpg'
+
 STREAMS = [
     {
         'channel': 0,

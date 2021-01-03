@@ -9,9 +9,14 @@
     </extension>
     <extension point="xbmc.service" library="service.py"/>
     <extension point="xbmc.addon.metadata">
-        <summary lang="en_US">Radio Paradise</summary>
+        <summary lang="en_US">Radio Paradise addon for Kodi</summary>
+        <description lang="en_US">An eclectic DJ-mixed blend of rock, indie, electronica, world music, and more. Listener supported &amp; always 100% commercial free.</description>
+        <website>https://radioparadise.com/</website>
+        <source>https://github.com/7adietri/script.radioparadise</source>
+        <platform>all</platform>
         <assets>
             <icon>resources/icon.png</icon>
+            <fanart>resources/fanart.jpg</fanart>
         </assets>
     </extension>
 </addon>

@@ -56,12 +56,13 @@ class Player(xbmc.Player):
             self.last_key = None
             return
 
-        xbmc.log(f'Song: {song_key}', xbmc.LOGINFO)
+        xbmc.log(f'rp_service: song_key {song_key}', xbmc.LOGDEBUG)
         song_data = self.now_playing.get_song_data(song_key)
         if song_data is None:
             return
 
         cover = song_data.get('cover')
+        xbmc.log(f'rp_service: cover {cover}', xbmc.LOGDEBUG)
 
         addon = xbmcaddon.Addon()
         slideshow = addon.getSetting('slideshow')

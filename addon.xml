@@ -13,6 +13,7 @@
         <description lang="en_US">An eclectic DJ-mixed blend of rock, indie, electronica, world music, and more. Listener supported &amp; always 100% commercial free.</description>
         <website>https://radioparadise.com/</website>
         <source>https://github.com/7adietri/script.radioparadise</source>
+        <license>GPL-3.0-or-later</license>
         <platform>all</platform>
         <assets>
             <icon>resources/icon.png</icon>

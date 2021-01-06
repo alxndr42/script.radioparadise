@@ -1,0 +1,33 @@
+#!/bin/bash -e
+
+if [ $# -lt 1 ]; then
+	echo "Usage: $(basename "$0") [zip] <destination>"
+	exit 1
+fi
+
+if [ "$1" = "zip" ]; then
+	MODE="zip"
+	shift
+else
+	MODE="folder"
+fi
+
+DIR=$(basename "$PWD")
+SRC=(COPYING LICENSE.txt README.md addon.xml *.py resources/)
+DST="$1"
+
+if [ "$MODE" = "zip" ]; then
+	SRC=("${SRC[@]/#/${DIR}/}")
+	cd ..
+	rm -f "$DST"
+	zip -r "$DST" "${SRC[@]}"
+else
+	if [ ! -d "$DST/.git" ]; then
+		echo "Destination is not a Git repository, exiting."
+		exit 1
+	fi
+	REPODIR="${DST:?}/$DIR"
+	rm -rf "$REPODIR"
+	mkdir "$REPODIR"
+	cp -r "${SRC[@]}" "$REPODIR"
+fi

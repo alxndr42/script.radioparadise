@@ -32,7 +32,7 @@
 			<group id="visuals" label="30103">
 				<setting id="slideshow" type="string" label="108">
 					<level>0</level>
-					<default>disabled</default>
+					<default>rp</default>
 					<constraints>
 						<options>
 							<option label="1223">disabled</option>

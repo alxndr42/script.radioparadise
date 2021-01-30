@@ -14,7 +14,7 @@
 		<control type="list" id="50">
 			<left>50%</left>
 			<centertop>50%</centertop>
-			<width>400</width>
+			<width>180</width>
 			<height>120</height>
 			<viewtype>list</viewtype>
 			<itemlayout height="30">
@@ -25,10 +25,14 @@
 				</control>
 			</itemlayout>
 			<focusedlayout height="30">
+				<control type="image">
+					<left>0</left>
+					<texture>menu-focus.png</texture>
+				</control>
 				<control type="label">
 					<left>10</left>
 					<label>$INFO[ListItem.Label]</label>
-					<textcolor>ff449944</textcolor>
+					<textcolor>ffeeeeee</textcolor>
 				</control>
 			</focusedlayout>
 		</control>

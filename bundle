@@ -13,7 +13,7 @@ else
 fi
 
 DIR=$(basename "$PWD")
-SRC=(COPYING LICENSE.txt README.md addon.xml *.py resources/)
+SRC=(CHANGELOG.md COPYING LICENSE.txt README.md addon.xml *.py resources/)
 DST="$1"
 
 if [ "$MODE" = "zip" ]; then

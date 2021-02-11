@@ -7,7 +7,7 @@ from radioparadise import STREAMS
 
 class Window(xbmcgui.WindowXML):
     def onInit(self):
-        xbmc.executebuiltin('Container.SetViewMode(50)')
+        xbmc.executebuiltin('Container.SetViewMode(100)')
         listitems = []
         for s in STREAMS:
             item = xbmcgui.ListItem(s['title'])
@@ -19,7 +19,7 @@ class Window(xbmcgui.WindowXML):
         self.setFocusId(self.getCurrentContainerId())
 
     def onClick(self, controlId):
-        if controlId == 50:
+        if controlId == 100:
             item = self.getListItem(self.getCurrentListPosition())
             channel = int(item.getProperty('channel'))
             play_channel(channel)
@@ -45,7 +45,7 @@ if __name__ == '__main__':
     addon_path = addon.getAddonInfo('path')
     auto_play = addon.getSettingInt('auto_play')
     if auto_play == -1:
-        window = Window('radioparadise.xml', addon_path)
+        window = Window('script-radioparadise.xml', addon_path)
         window.doModal()
         del window
     else:

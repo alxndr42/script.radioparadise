@@ -1,4 +1,3 @@
-from collections import namedtuple
 import time
 
 import requests
@@ -9,11 +8,28 @@ import xbmcgui
 from radioparadise import SLIDESHOW_URL, STREAM_INFO, NowPlaying
 
 
-RESTART_INTERVAL = 1.0
+DEVELOPMENT = False
+
+RESTART_DELAY = 1.0
 RESTART_TIMEOUT = 1.0
 
 
-Song = namedtuple('Song', 'data cover fanart')
+class Song():
+    """Current song information."""
+
+    def __init__(self, key, data, fanart):
+        self.key = key
+        self.data = data
+        self.fanart = fanart
+        self.cover = data['cover']
+
+    def __str__(self):
+        artist = self.data.get('artist', 'Unknown Artist')
+        title = self.data.get('title', 'Unknown Title')
+        return f'{artist} - {title}'
+
+    def changed(self, key):
+        return key is not None and key != self.key
 
 
 class Player(xbmc.Player):
@@ -22,8 +38,7 @@ class Player(xbmc.Player):
     def __init__(self):
         """Constructor"""
         super().__init__()
-        self.last_key = None
-        self.last_song = None
+        self.song = None
         self.stream_url = None
         self.restart_time = 0
         self.now_playing = NowPlaying()
@@ -36,14 +51,15 @@ class Player(xbmc.Player):
             try:
                 info = self.getMusicInfoTag()
                 result = (info.getArtist(), info.getTitle())
+                if result == ('', ''):
+                    result = None
             except Exception:
                 pass
         return result
 
     def reset(self):
         """Reset internal state when not playing RP."""
-        self.last_key = None
-        self.last_song = None
+        self.song = None
         self.stream_url = None
         self.restart_time = 0
         self.now_playing.set_channel(None)
@@ -63,7 +79,7 @@ class Player(xbmc.Player):
             self.restart_time = 0
             self.play(self.stream_url)
         else:
-            self.restart_time = now + RESTART_INTERVAL
+            self.restart_time = now + RESTART_DELAY
 
     def update(self):
         """Perform updates."""
@@ -76,7 +92,7 @@ class Player(xbmc.Player):
 
     def update_player(self):
         """Update the Kodi player with song metadata."""
-        song = self.last_song
+        song = self.song
         if song and self.isPlayingAudio():
             info = {
                 'artist': song.data['artist'],
@@ -100,31 +116,24 @@ class Player(xbmc.Player):
 
     def update_slideshow(self):
         """Update the slideshow, if necessary."""
+        song = self.song
         next_slide = self.slideshow.next_slide()
-        if next_slide and self.last_song:
-            self.last_song = self.last_song._replace(fanart=next_slide)
+        if song and next_slide:
+            song.fanart = next_slide
             self.update_player()
 
     def update_song(self):
         """Update song metadata, if necessary."""
-        last_key = self.last_key
-        last_song = self.last_song
         song_key = self.get_song_key()
-        if song_key is None or song_key == last_key:
+        song = self.song
+        if song_key is None or (song and not song.changed(song_key)):
             return
 
-        if song_key != ('', ''):
-            xbmc.log(f'rp_service: song_key {song_key}', xbmc.LOGDEBUG)
-            song_data = self.now_playing.get_song_data(song_key)
-            if song_data:
-                self.last_key = song_key
-        else:
+        song_data = self.now_playing.get_song_data(song_key)
+        if song_data is None:
             song_data = self.now_playing.current
-        if song_data is None or last_song and last_song.data == song_data:
+        if song_data is None:
             return
-
-        cover = song_data.get('cover')
-        xbmc.log(f'rp_service: cover {cover}', xbmc.LOGDEBUG)
 
         addon = xbmcaddon.Addon()
         slideshow = addon.getSetting('slideshow')
@@ -137,8 +146,8 @@ class Player(xbmc.Player):
         else:
             self.slideshow.set_slides(None)
             fanart = None
-
-        self.last_song = Song(song_data, cover, fanart)
+        self.song = Song(song_key, song_data, fanart)
+        log(f'Song: {self.song}')
         self.update_player()
 
     def onAVStarted(self):
@@ -201,7 +210,18 @@ class Slideshow():
         return result
 
 
+def log(message, level=None):
+    """Write to the Kodi log."""
+    if level is not None:
+        xbmc.log(f'rp_service: {message}', level)
+    elif DEVELOPMENT:
+        xbmc.log(f'rp_service: {message}', xbmc.LOGINFO)
+    else:
+        xbmc.log(f'rp_service: {message}', xbmc.LOGDEBUG)
+
+
 if __name__ == '__main__':
+    log('Service started.')
     player = Player()
     monitor = xbmc.Monitor()
     while not monitor.abortRequested():
@@ -210,4 +230,5 @@ if __name__ == '__main__':
         try:
             player.update()
         except Exception as e:
-            xbmc.log(f'rp_service: {e}', xbmc.LOGERROR)
+            log(e, xbmc.LOGERROR)
+    log('Service exiting.')

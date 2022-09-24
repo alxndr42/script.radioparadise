@@ -5,7 +5,7 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 
-from radioparadise import SLIDESHOW_URL, STREAM_INFO, NowPlaying
+from radioparadise import SLIDESHOW_URL, STREAM_INFO, NowPlaying, build_key
 
 
 DEVELOPMENT = False
@@ -45,14 +45,14 @@ class Player(xbmc.Player):
         self.slideshow = Slideshow()
 
     def get_song_key(self):
-        """Return (artist, title) for the current song, or None."""
+        """Return a key for the current song, or None."""
         result = None
         if self.isPlayingAudio():
             try:
                 info = self.getMusicInfoTag()
-                result = (info.getArtist(), info.getTitle())
-                if result == ('', ''):
-                    result = None
+                artist_title = (info.getArtist(), info.getTitle())
+                if artist_title != ('', ''):
+                    result = build_key(artist_title)
             except Exception:
                 pass
         return result

@@ -61,12 +61,11 @@ class NowPlaying():
         return self._current
 
     def get_song_data(self, song_key):
-        """Return a dict for the (artist, title) key, or None.
+        """Return a dict for the build_key()-created key, or None.
 
         The "cover" value will be an absolute URL.
         """
-        key = build_key(song_key)
-        return self.songs.get(key)
+        return self.songs.get(song_key)
 
     def set_channel(self, channel):
         """Set the RP channel number, or None."""

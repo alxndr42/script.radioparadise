@@ -1,4 +1,5 @@
 import time
+import traceback
 
 import requests
 import xbmc
@@ -230,5 +231,10 @@ if __name__ == '__main__':
         try:
             player.update()
         except Exception as e:
-            log(e, xbmc.LOGERROR)
+            if DEVELOPMENT:
+                lines = traceback.format_exception(e)
+                for line in lines:
+                    log(line, xbmc.LOGERROR)
+            else:
+                log(repr(e), xbmc.LOGERROR)
     log('Service exiting.')

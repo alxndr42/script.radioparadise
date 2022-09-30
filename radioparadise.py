@@ -99,8 +99,9 @@ class NowPlaying():
             key = build_key(BREAK_KEY)
             songs[key] = {
                 'artist': BREAK_KEY[0],
-                'cover': BREAK_COVER_URL,
                 'title': BREAK_KEY[1],
+                'cover': BREAK_COVER_URL,
+                'duration': '30000',
             }
         self.songs = songs
         self.next_update = now + data['refresh']

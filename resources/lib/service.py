@@ -6,7 +6,7 @@ import xbmc
 import xbmcaddon
 import xbmcgui
 
-from .radioparadise import SLIDESHOW_URL, STREAM_INFO, NowPlaying, build_key
+from .radioparadise import STREAM_INFO, NowPlaying, build_key
 
 
 DEVELOPMENT = False
@@ -164,8 +164,7 @@ class Player(xbmc.Player):
         addon = xbmcaddon.Addon()
         slideshow = addon.getSetting('slideshow')
         if slideshow == 'rp':
-            slides = song_data.get('slideshow', '').split(',')
-            slides = [SLIDESHOW_URL.format(s) for s in slides if s]
+            slides = song_data.get('slide_urls')
             delay = addon.getSettingInt('slide_duration')
             self.slideshow.set_slides(slides, delay)
             fanart = self.slideshow.next_slide()

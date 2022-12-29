@@ -91,6 +91,9 @@ class NowPlaying():
             if song['title'] is None:
                 song['title'] = 'Unknown Title'
             song['cover'] = COVER_URL.format(song['cover'])
+            slides = song.get('slideshow', '').split(',')
+            slides = [SLIDESHOW_URL.format(s) for s in slides if s]
+            song['slide_urls'] = slides
             key = build_key((song['artist'], song['title']))
             songs[key] = song
             if index == '0':

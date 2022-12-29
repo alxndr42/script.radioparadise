@@ -85,7 +85,7 @@ class NowPlaying():
         res.raise_for_status()
         data = res.json()
         songs = {}
-        for index, song in data['song'].items():
+        for index, song in list(data['song'].items()):
             if song['artist'] is None:
                 song['artist'] = 'Unknown Artist'
             if song['title'] is None:

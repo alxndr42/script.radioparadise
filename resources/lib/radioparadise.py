@@ -9,7 +9,7 @@ COVER_URL = 'https://img.radioparadise.com/{}'
 SLIDESHOW_URL = 'https://img.radioparadise.com/slideshow/720/{}.jpg'
 
 BREAK_COVER_URL = 'https://img.radioparadise.com/covers/l/101.jpg'
-BREAK_KEY = ('Commercial-free', 'Listener-supported')
+BREAK_SONG = ('Commercial-free', 'Listener-supported')
 
 KEY_FILTER_RE = re.compile(r'[^\w\']+')
 
@@ -98,11 +98,10 @@ class NowPlaying():
             songs[key] = song
             if index == '0':
                 self.current = song
-        if BREAK_KEY not in songs:
-            key = build_key(BREAK_KEY)
-            songs[key] = {
-                'artist': BREAK_KEY[0],
-                'title': BREAK_KEY[1],
+        if (break_key := build_key(BREAK_SONG)) not in songs:
+            songs[break_key] = {
+                'artist': BREAK_SONG[0],
+                'title': BREAK_SONG[1],
                 'cover': BREAK_COVER_URL,
                 'duration': '30000',
             }

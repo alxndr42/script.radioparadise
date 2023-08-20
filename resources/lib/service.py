@@ -105,24 +105,21 @@ class Player(xbmc.Player):
         """Update the Kodi player with song metadata."""
         song = self.song
         if song and self.isPlayingAudio():
-            info = {
-                'artist': song.data['artist'],
-                'title': song.data['title'],
-                'genre': '',
-            }
+            item = self.getPlayingItem()
+            tag = item.getMusicInfoTag()
+            tag.setArtist(song.data['artist'])
+            tag.setTitle(song.data['title'])
+            tag.setGenres([])
             if 'album' in song.data:
-                info['album'] = song.data['album']
+                tag.setAlbum(song.data['album'])
             if 'rating' in song.data:
                 rating = float(song.data['rating'])
-                info['rating'] = rating
-                info['userrating'] = int(round(rating))
+                tag.setRating(rating)
+                tag.setUserRating(int(round(rating)))
             if 'year' in song.data:
-                info['year'] = int(song.data['year'])
-            item = xbmcgui.ListItem()
-            item.setPath(self.getPlayingFile())
+                tag.setYear(int(song.data['year']))
             item.setArt({'thumb': song.cover})
             item.setArt({'fanart': song.fanart})
-            item.setInfo('music', info)
             self.updateInfoTag(item)
 
     def update_slideshow(self):

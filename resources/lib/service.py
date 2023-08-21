@@ -11,7 +11,7 @@ from .radioparadise import STREAM_INFO, NowPlaying, build_key
 
 DEVELOPMENT = False
 
-EXPIRATION_DELAY = 30
+EXPIRATION_DELAY = 10
 
 RESTART_DELAY = 1.0
 RESTART_TIMEOUT = 1.0
@@ -33,14 +33,13 @@ class Song():
         title = self.data.get('title', 'Unknown Title')
         return f'{artist} - {title}'
 
-    def changed(self, key):
-        """Return True if the key indicates a song change."""
-        return key is not None and key != self.key
-
     def expired(self):
         """Return True if this Song should be considered overdue."""
-        expiration = self.start_time + self.duration + EXPIRATION_DELAY
-        return time.time() > expiration
+        if self.start_time:
+            expiration = self.start_time + self.duration + EXPIRATION_DELAY
+            return time.time() > expiration
+        else:
+            return False
 
 
 class Player(xbmc.Player):
@@ -52,6 +51,8 @@ class Player(xbmc.Player):
         self.song = None
         self.stream_url = None
         self.restart_time = 0
+        self.tracked_key = None
+        self.tracked_time = 0
         self.now_playing = NowPlaying()
         self.slideshow = Slideshow()
 
@@ -73,13 +74,14 @@ class Player(xbmc.Player):
         self.song = None
         self.stream_url = None
         self.restart_time = 0
+        self.tracked_key = None
+        self.tracked_time = 0
         self.now_playing.set_channel(None)
         self.slideshow.set_slides(None)
 
     def restart(self):
         """Restart playback, if necessary."""
-        now = time.time()
-        if not self.restart_time or now < self.restart_time:
+        if not self.restart_time or time.time() < self.restart_time:
             return
         try:
             res = requests.head(self.stream_url, timeout=RESTART_TIMEOUT)
@@ -90,7 +92,7 @@ class Player(xbmc.Player):
             self.restart_time = 0
             self.play(self.stream_url)
         else:
-            self.restart_time = now + RESTART_DELAY
+            self.restart_time = time.time() + RESTART_DELAY
 
     def update(self):
         """Perform updates."""
@@ -110,16 +112,30 @@ class Player(xbmc.Player):
             tag.setArtist(song.data['artist'])
             tag.setTitle(song.data['title'])
             tag.setGenres([])
-            if 'album' in song.data:
-                tag.setAlbum(song.data['album'])
-            if 'rating' in song.data:
-                rating = float(song.data['rating'])
-                tag.setRating(rating)
-                tag.setUserRating(int(round(rating)))
-            if 'year' in song.data:
-                tag.setYear(int(song.data['year']))
+            tag.setAlbum(song.data.get('album', ''))
+            rating = float(song.data.get('rating', 0))
+            tag.setRating(rating)
+            tag.setUserRating(int(round(rating)))
+            tag.setYear(int(song.data.get('year', 0)))
             item.setArt({'thumb': song.cover})
             item.setArt({'fanart': song.fanart})
+            self.updateInfoTag(item)
+
+    def clear_player(self):
+        """Clear most of the Kodi player's song information."""
+        if self.isPlayingAudio():
+            info = self.getMusicInfoTag()
+            item = self.getPlayingItem()
+            tag = item.getMusicInfoTag()
+            tag.setArtist(info.getArtist())
+            tag.setTitle(info.getTitle())
+            tag.setGenres([])
+            tag.setAlbum('')
+            tag.setRating(0)
+            tag.setUserRating(0)
+            tag.setYear(0)
+            item.setArt({'thumb': None})
+            item.setArt({'fanart': None})
             self.updateInfoTag(item)
 
     def update_slideshow(self):
@@ -132,31 +148,40 @@ class Player(xbmc.Player):
 
     def update_song(self):
         """Update song metadata, if necessary."""
-        song_key = self.get_song_key()
+        player_key = self.get_song_key()
         song = self.song
-        if song_key is None:
+        if player_key is None:
             return
-        if song and not (song.changed(song_key) or song.expired()):
+        if song and not (song.key != player_key or song.expired()):
             return
+
+        # Keep track of the local song start time
+        if self.tracked_key != player_key:
+            if self.tracked_key is not None:
+                self.tracked_time = time.time()
+            self.tracked_key = player_key
 
         start_time = None
         song_data = None
-        if song and song.changed(song_key):
-            start_time = time.time()
-            song_data = self.now_playing.get_song_data(song_key)
+        # Try to match API metadata on song changes
+        if song and song.key != player_key and not song.expired():
+            start_time = self.tracked_time
+            song_data = self.now_playing.get_song_data(player_key)
+        # Show "next" song if the song change was missed
         elif song and song.expired():
             start_time = song.start_time + song.duration
-            song_data = self.now_playing.current
-            log('Song expired.', xbmc.LOGWARNING)
+            song_data = self.now_playing.get_next_song(player_key)
+            # Without API metadata, show the stream metadata
+            if song_data is None and song.start_time:
+                song.start_time = 0
+                self.slideshow.set_slides(None)
+                self.clear_player()
+        # Show "current" song after starting playback
         elif song is None:
             song_data = self.now_playing.current
         # API metadata may not be available yet
         if song_data is None:
             return
-
-        song_key = build_key((song_data['artist'], song_data['title']))
-        if start_time is None:
-            start_time = int(song_data['sched_time'])
 
         addon = xbmcaddon.Addon()
         slideshow = addon.getSetting('slideshow')
@@ -168,6 +193,7 @@ class Player(xbmc.Player):
         else:
             self.slideshow.set_slides(None)
             fanart = None
+        song_key = build_key((song_data['artist'], song_data['title']))
         self.song = Song(song_key, song_data, fanart, start_time)
         log(f'Song: {self.song}')
         self.update_player()

@@ -16,7 +16,10 @@ KEY_FILTER_RE = re.compile(r'[^\w\']+')
 
 # Number of songs to cache
 MAX_SONGS = 30
-UPDATE_TIMEOUT = 2.0
+# Number of seconds to wait for API responses
+UPDATE_TIMEOUT = 3
+# Number of seconds to wait before retrying API updates
+UPDATE_WAIT = 5
 
 STREAMS = [
     {
@@ -90,11 +93,15 @@ class NowPlaying():
         """
         if self.url is None:
             return
-        now = time.time()
-        if now < self.next_update:
+        if time.time() < self.next_update:
             return
-        res = requests.get(self.url, timeout=UPDATE_TIMEOUT)
-        res.raise_for_status()
+
+        try:
+            res = requests.get(self.url, timeout=UPDATE_TIMEOUT)
+            res.raise_for_status()
+        except Exception:
+            self.next_update = time.time() + UPDATE_WAIT
+            raise
 
         next_key = None
         data = res.json()
@@ -121,7 +128,7 @@ class NowPlaying():
                 'cover': BREAK_COVER_URL,
                 'duration': '30000',
             }
-        self.next_update = now + data['refresh']
+        self.next_update = time.time() + data['refresh']
         while len(self.songs) > MAX_SONGS:
             self.songs.popitem(last=False)
 

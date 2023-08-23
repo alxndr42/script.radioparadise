@@ -279,9 +279,7 @@ def run_service():
             player.update()
         except Exception as e:
             if DEVELOPMENT:
-                lines = traceback.format_exception(e)
-                for line in lines:
-                    log(line, xbmc.LOGERROR)
+                log(traceback.format_exc(), xbmc.LOGERROR)
             else:
                 log(repr(e), xbmc.LOGERROR)
     log('Service exiting.')

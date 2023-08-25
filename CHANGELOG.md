@@ -1,3 +1,8 @@
+## v2.0.0
+
+- Updates for Kodi v20
+- Improve metadata handling
+
 ## v1.0.5
 
 - Rename World/Etc mix to Global

@@ -12,7 +12,7 @@ Plays [Radio Paradise][] music mixes, accompanied by the HD slideshow.
 
 ## Requirements
 
-- Kodi [release][] v19 or later
+- Kodi [release][] v20 or later
 
 [release]: https://kodi.wiki/view/Releases
 

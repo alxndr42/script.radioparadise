@@ -44,3 +44,7 @@ msgstr ""
 msgctxt "#30207"
 msgid "RP Slideshow"
 msgstr ""
+
+msgctxt "#30208"
+msgid "Serenity"
+msgstr ""

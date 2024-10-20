@@ -31,6 +31,7 @@ RunScript('script.radioparadise', 1)
 | 1 | Mellow Mix |
 | 2 | Rock Mix |
 | 3 | Global Mix |
+| 4 | Serenity |
 
 This can be used to add shortcuts for RP channels in [favourites.xml][].
 

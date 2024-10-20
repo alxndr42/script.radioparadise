@@ -22,5 +22,11 @@
         "title": "Global Mix",
         "url_aac": "http://stream.radioparadise.com/global-128",
         "url_flac": "http://stream.radioparadise.com/global-flacm"
+    },
+    {
+        "channel_id": "42",
+        "title": "Serenity",
+        "url_aac": "http://stream.radioparadise.com/serenity",
+        "url_flac": "http://stream.radioparadise.com/serenity"
     }
 ]

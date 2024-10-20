@@ -6,7 +6,7 @@ import xbmcaddon
 import xbmcgui
 
 from .logger import Logger
-from .radioparadise import STREAM_INFO, NowPlaying, build_key
+from .radioparadise import CHANNEL_INFO, NowPlaying, build_key
 
 
 EXPIRATION_DELAY = 10
@@ -200,9 +200,9 @@ class Player(xbmc.Player):
         self.update_player()
 
     def onAVStarted(self):
-        if self.isPlaying() and self.getPlayingFile() in STREAM_INFO:
+        if self.isPlaying() and self.getPlayingFile() in CHANNEL_INFO:
             url = self.getPlayingFile()
-            info = STREAM_INFO[url]
+            info = CHANNEL_INFO[url]
             # Kodi switches to fullscreen for FLAC, but not AAC
             if url == info['url_aac']:
                 xbmc.executebuiltin('Action(FullScreen)')
@@ -219,12 +219,12 @@ class Player(xbmc.Player):
         self.reset()
 
     def onPlayBackStarted(self):
-        if self.isPlaying() and self.getPlayingFile() in STREAM_INFO:
+        if self.isPlaying() and self.getPlayingFile() in CHANNEL_INFO:
             url = self.getPlayingFile()
             self.stream_url = url
             self.restart_time = 0
-            info = STREAM_INFO[url]
-            self.now_playing.set_channel(info['channel'])
+            info = CHANNEL_INFO[url]
+            self.now_playing.set_channel(info['channel_id'])
         else:
             self.reset()
 

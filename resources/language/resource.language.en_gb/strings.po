@@ -26,19 +26,19 @@ msgid "FLAC"
 msgstr ""
 
 msgctxt "#30203"
-msgid "RP Main Mix"
+msgid "Main Mix"
 msgstr ""
 
 msgctxt "#30204"
-msgid "RP Mellow Mix"
+msgid "Mellow Mix"
 msgstr ""
 
 msgctxt "#30205"
-msgid "RP Rock Mix"
+msgid "Rock Mix"
 msgstr ""
 
 msgctxt "#30206"
-msgid "RP Global Mix"
+msgid "Global Mix"
 msgstr ""
 
 msgctxt "#30207"

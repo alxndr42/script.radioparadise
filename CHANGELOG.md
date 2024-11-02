@@ -1,3 +1,7 @@
+## v2.1.1
+
+- Improve metadata handling
+
 ## v2.1.0
 
 - Add Serenity channel

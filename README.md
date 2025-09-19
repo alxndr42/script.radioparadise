@@ -37,3 +37,7 @@ RunScript('script.radioparadise', 1)
 This can be used to add shortcuts for RP channels in [favourites.xml][].
 
 [favourites.xml]: https://kodi.wiki/view/Favourites.xml
+
+---
+
+Trans Rights are Human Rights! 🏳️‍⚧️ 🏳️‍🌈
